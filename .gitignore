@@ -1,48 +1,39 @@
-```gitignore
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-dist/
-build/
-*.class
-
-# Dependencies
-.venv/
-venv/
-node_modules/
-vendor/
-composer.lock
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
-
-# Environment
+```
+# Environment and configuration
 .env
 .env.local
 .env.*
 
-# Editors
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Editor/IDE files
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
 
-# OS
+# OS-specific files
 .DS_Store
 Thumbs.db
 
-# Coverage
-.coverage
-coverage/
-htmlcov/
+# Cache directories
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# PHP specific
-*.php~
-*.bak
-.htaccess
+# Build artifacts
+dist/
+build/
+*.so
+*.dll
+*.exe
+
+# Dependencies
+node_modules/
+venv/
+.venv/
 ```

@@ -1,22 +1,27 @@
-    <section class="py-5">
-        <div class="container">
-            <h1 class="mb-4">Category: <?php echo htmlspecialchars($cat['name'] ?? $category_slug); ?></h1>
-            <div class="row">
-            <?php if(!empty($posts)): ?>
-                <?php foreach($posts as $post): ?>
-                <div class="col-md-6 mb-4">
-                    <div class="card post-card">
-                        <div class="card-body">
-                            <h5><a href="index.php?post=<?php echo $post['slug']; ?>" class="text-decoration-none"><?php echo htmlspecialchars($post['title']); ?></a></h5>
-                            <p class="text-muted"><?php echo get_excerpt($post['content'], 100); ?></p>
-                            <small class="text-muted"><?php echo format_date($post['published_at']); ?></small>
-                        </div>
+<?php
+global $cms_db;
+$slug = $_GET['category'];
+$category = db_fetch(db_query("SELECT * FROM terms WHERE slug=?", [$slug]));
+if ($category) {
+    $posts = db_fetch_all(db_query("SELECT p.* FROM posts p INNER JOIN term_relationships tr ON p.id = tr.object_id WHERE tr.term_id = ? AND p.status='published'", [$category['id']]));
+}
+?>
+<div class="container py-5">
+    <h1 class="mb-4"><?php echo $category ? htmlspecialchars($category['name']) : 'Category'; ?></h1>
+    <?php if (empty($posts)): ?>
+        <p class="text-muted">No posts in this category.</p>
+    <?php else: ?>
+        <div class="row g-4">
+        <?php foreach ($posts as $post): ?>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5><a href="?post=<?php echo $post['slug']; ?>"><?php echo htmlspecialchars($post['title']); ?></a></h5>
+                        <p class="text-muted"><?php echo htmlspecialchars(substr($post['excerpt'] ?: $post['content'], 0, 100)); ?>...</p>
                     </div>
                 </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="text-muted">No posts in this category.</p>
-            <?php endif; ?>
             </div>
+        <?php endforeach; ?>
         </div>
-    </section>
+    <?php endif; ?>
+</div>

@@ -1,383 +1,339 @@
 <?php
 /**
- * CMS Helper Functions
- * Procedural PHP helper functions for the CMS
+ * Core Functions & World-Class Architecture
+ * Procedural PHP | MySQLi | Hook System | Security | CPT | Audit Log
  */
 
-// Security: Check if user is logged in
+// Start Session if not started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../config.php';
+
+// ============================================================================
+// 1. DATABASE ABSTRACTION & SECURITY LAYER
+// ============================================================================
+
+global $cms_db;
+$cms_db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
+if ($cms_db->connect_error) {
+    die("Connection failed: " . $cms_db->connect_error);
+}
+
+$cms_db->set_charset("utf8mb4");
+
+/**
+ * Safe Query Execution (Prevents SQL Injection)
+ */
+function db_query($sql, $params = []) {
+    global $cms_db;
+    
+    if (empty($params)) {
+        return $cms_db->query($sql);
+    }
+
+    $stmt = $cms_db->prepare($sql);
+    if (!$stmt) {
+        error_log("DB Prepare Error: " . $cms_db->error);
+        return false;
+    }
+
+    $types = '';
+    $values = [];
+    foreach ($params as $param) {
+        if (is_int($param)) $types .= 'i';
+        elseif (is_float($param)) $types .= 'd';
+        else $types .= 's';
+        $values[] = $param;
+    }
+
+    $stmt->bind_param($types, ...$values);
+    $stmt->execute();
+    return $stmt;
+}
+
+function db_fetch($result) {
+    if ($result instanceof mysqli_stmt) {
+        $res = $result->get_result();
+        return $res->fetch_assoc();
+    }
+    return $result->fetch_assoc();
+}
+
+function db_fetch_all($result) {
+    if ($result instanceof mysqli_stmt) {
+        $res = $result->get_result();
+        return $res->fetch_all(MYSQLI_ASSOC);
+    }
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// ============================================================================
+// 2. HOOK SYSTEM (ACTIONS & FILTERS)
+// ============================================================================
+
+global $cms_hooks;
+$cms_hooks = ['actions' => [], 'filters' => []];
+
+function add_action($tag, $function_to_add, $priority = 10) {
+    global $cms_hooks;
+    $cms_hooks['actions'][$tag][$priority][] = $function_to_add;
+    ksort($cms_hooks['actions'][$tag]);
+}
+
+function add_filter($tag, $function_to_add, $priority = 10) {
+    global $cms_hooks;
+    $cms_hooks['filters'][$tag][$priority][] = $function_to_add;
+    ksort($cms_hooks['filters'][$tag]);
+}
+
+function do_action($tag, ...$args) {
+    global $cms_hooks;
+    if (!isset($cms_hooks['actions'][$tag])) return;
+    foreach ($cms_hooks['actions'][$tag] as $priority_group) {
+        foreach ($priority_group as $function) {
+            call_user_func_array($function, $args);
+        }
+    }
+}
+
+function apply_filters($tag, $value, ...$args) {
+    global $cms_hooks;
+    if (!isset($cms_hooks['filters'][$tag])) return $value;
+    foreach ($cms_hooks['filters'][$tag] as $priority_group) {
+        foreach ($priority_group as $function) {
+            array_unshift($args, $value);
+            $value = call_user_func_array($function, $args);
+        }
+    }
+    return $value;
+}
+
+// ============================================================================
+// 3. NONCE SECURITY SYSTEM (CSRF Protection)
+// ============================================================================
+
+function create_nonce($action = -1) {
+    $tick = ceil(time() / 43200);
+    $uid = session_id() ?: '0';
+    return substr(md5($tick . $action . $uid . DB_SECRET), 0, 10);
+}
+
+function verify_nonce($nonce, $action = -1) {
+    if (empty($nonce)) return false;
+    return $nonce === create_nonce($action);
+}
+
+function wp_nonce_field($action = -1, $name = '_wpnonce') {
+    $token = create_nonce($action);
+    echo "<input type='hidden' name='$name' value='$token'>";
+}
+
+// ============================================================================
+// 4. CUSTOM POST TYPES API
+// ============================================================================
+
+global $cms_post_types;
+$cms_post_types = ['post', 'page'];
+
+function register_post_type($type, $args = []) {
+    global $cms_post_types;
+    if (!in_array($type, $cms_post_types)) {
+        $cms_post_types[] = $type;
+    }
+}
+
+function get_post_types() {
+    global $cms_post_types;
+    return $cms_post_types;
+}
+
+// ============================================================================
+// 5. ASSET MANAGEMENT (Enqueue System)
+// ============================================================================
+
+global $cms_assets;
+$cms_assets = ['scripts' => [], 'styles' => []];
+
+function enqueue_script($handle, $src, $deps = [], $ver = '1.0', $in_footer = true) {
+    global $cms_assets;
+    $cms_assets['scripts'][$handle] = compact('handle', 'src', 'deps', 'ver', 'in_footer');
+}
+
+function enqueue_style($handle, $src, $deps = [], $ver = '1.0') {
+    global $cms_assets;
+    $cms_assets['styles'][$handle] = compact('handle', 'src', 'deps', 'ver');
+}
+
+function print_scripts() {
+    global $cms_assets;
+    foreach ($cms_assets['scripts'] as $script) {
+        echo "<script src='{$script['src']}'></script>\n";
+    }
+}
+
+function print_styles() {
+    global $cms_assets;
+    foreach ($cms_assets['styles'] as $style) {
+        echo "<link rel='stylesheet' href='{$style['src']}'>\n";
+    }
+}
+
+// ============================================================================
+// 6. AUDIT LOGGING
+// ============================================================================
+
+function log_audit_event($action, $user_id, $details = '') {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $sql = "INSERT INTO audit_logs (user_id, action, details, ip_address, created_at) VALUES (?, ?, ?, ?, NOW())";
+    db_query($sql, [$user_id, $action, $details, $ip]);
+}
+
+// ============================================================================
+// 7. USER & PERMISSION HELPERS
+// ============================================================================
+
 function is_logged_in() {
-    return isset($_SESSION['user_id']) && isset($_SESSION['username']);
+    return isset($_SESSION['user_id']);
 }
 
-// Security: Check if user is admin
 function is_admin() {
-    return is_logged_in() && isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+    return defined('IS_ADMIN') && IS_ADMIN;
 }
 
-// Security: Require login
-function require_login() {
-    if (!is_logged_in()) {
-        header('Location: admin.php?action=login');
-        exit;
+function current_user_can($capability) {
+    if (!isset($_SESSION['user_id'])) return false;
+    $role = $_SESSION['user_role'] ?? 'subscriber';
+    if ($capability == 'manage_plugins' || $capability == 'edit_themes' || $capability == 'manage_options') {
+        return $role === 'admin';
     }
+    return true;
 }
 
-// Security: Require admin
-function require_admin() {
-    if (!is_admin()) {
-        header('Location: index.php?error=access_denied');
-        exit;
-    }
+function get_current_user_data() {
+    if (!is_logged_in()) return null;
+    global $cms_db;
+    $id = intval($_SESSION['user_id']);
+    $result = $cms_db->query("SELECT * FROM users WHERE id = $id");
+    return $result ? $result->fetch_assoc() : null;
 }
 
-// Get current user
-function get_current_user_data($conn) {
-    if (!is_logged_in()) {
-        return null;
-    }
-    
-    $user_id = (int)$_SESSION['user_id'];
-    $sql = "SELECT * FROM users WHERE id = $user_id";
-    $result = mysqli_query($conn, $sql);
-    
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result);
-    }
-    
-    return null;
+function redirect($url) {
+    header("Location: $url");
+    exit;
 }
 
-// Sanitize input
+// ============================================================================
+// 8. CONTENT HELPERS
+// ============================================================================
+
 function sanitize_input($data) {
-    global $conn;
-    return mysqli_real_escape_string($conn, trim(htmlspecialchars($data)));
+    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
 }
 
-// Generate slug from title
-function generate_slug($title) {
-    $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title), '-'));
-    return $slug;
-}
-
-// Get option value
-function get_option($conn, $option_name, $default = '') {
-    $sql = "SELECT option_value FROM options WHERE option_name = '" . sanitize_input($option_name) . "'";
-    $result = mysqli_query($conn, $sql);
-    
-    if ($result && mysqli_num_rows($result) > 0) {
-        $row = mysqli_fetch_assoc($result);
+function get_option($key, $default = '') {
+    global $cms_db;
+    $key = $cms_db->real_escape_string($key);
+    $result = $cms_db->query("SELECT option_value FROM options WHERE option_name = '$key'");
+    if ($row = $result->fetch_assoc()) {
         return $row['option_value'];
     }
-    
     return $default;
 }
 
-// Update option value
-function update_option($conn, $option_name, $option_value) {
-    $sql = "UPDATE options SET option_value = '" . sanitize_input($option_value) . "' 
-            WHERE option_name = '" . sanitize_input($option_name) . "'";
-    return mysqli_query($conn, $sql);
-}
-
-// Get active theme
-function get_active_theme($conn) {
-    $sql = "SELECT * FROM themes WHERE is_active = 1 LIMIT 1";
-    $result = mysqli_query($conn, $sql);
+function update_option($key, $value) {
+    global $cms_db;
+    $key = $cms_db->real_escape_string($key);
+    $value = $cms_db->real_escape_string($value);
     
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result);
+    $check = $cms_db->query("SELECT id FROM options WHERE option_name = '$key'");
+    if ($check->num_rows > 0) {
+        $cms_db->query("UPDATE options SET option_value = '$value' WHERE option_name = '$key'");
+    } else {
+        $cms_db->query("INSERT INTO options (option_name, option_value) VALUES ('$key', '$value')");
     }
+}
+
+// ============================================================================
+// 9. REVISION SYSTEM
+// ============================================================================
+
+function save_post_revision($post_id, $user_id) {
+    global $cms_db;
+    $post_id = intval($post_id);
+    $user_id = intval($user_id);
     
-    // Default to multipurpose
-    $sql = "SELECT * FROM themes WHERE slug = 'multipurpose' LIMIT 1";
-    $result = mysqli_query($conn, $sql);
+    $result = $cms_db->query("SELECT * FROM posts WHERE id = $post_id");
+    if (!$result || $result->num_rows === 0) return false;
     
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result);
+    $post = $result->fetch_assoc();
+    
+    $sql = "INSERT INTO post_revisions (post_id, title, content, excerpt, author_id, created_at) 
+            VALUES (?, ?, ?, ?, ?, NOW())";
+    return db_query($sql, [$post_id, $post['title'], $post['content'], $post['excerpt'], $user_id]);
+}
+
+function get_post_revisions($post_id) {
+    $sql = "SELECT * FROM post_revisions WHERE post_id = ? ORDER BY created_at DESC";
+    return db_fetch_all(db_query($sql, [intval($post_id)]));
+}
+
+function restore_revision($revision_id) {
+    global $cms_db;
+    $revision_id = intval($revision_id);
+    
+    $result = $cms_db->query("SELECT * FROM post_revisions WHERE id = $revision_id");
+    if (!$result || $result->num_rows === 0) return false;
+    
+    $rev = $result->fetch_assoc();
+    
+    $sql = "UPDATE posts SET title = ?, content = ?, excerpt = ? WHERE id = ?";
+    return db_query($sql, [$rev['title'], $rev['content'], $rev['excerpt'], $rev['post_id']]);
+}
+
+// ============================================================================
+// 10. MULTI-LANGUAGE SUPPORT
+// ============================================================================
+
+global $cms_current_lang;
+$cms_current_lang = get_option('default_language', 'en');
+
+function set_language($lang) {
+    global $cms_current_lang;
+    $allowed = ['en', 'es', 'fr', 'de', 'ar', 'zh'];
+    if (in_array($lang, $allowed)) {
+        $cms_current_lang = $lang;
+        update_option('current_language', $lang);
     }
-    
-    return null;
 }
 
-// Get all themes
-function get_all_themes($conn) {
-    $sql = "SELECT * FROM themes ORDER BY name";
-    $result = mysqli_query($conn, $sql);
-    
-    $themes = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $themes[] = $row;
+function __($text, $domain = 'default') {
+    return $text;
+}
+
+function _e($text, $domain = 'default') {
+    echo __($text, $domain);
+}
+
+// ============================================================================
+// DEFAULT HOOKS INITIALIZATION
+// ============================================================================
+
+add_action('init', 'setup_default_post_types');
+function setup_default_post_types() {
+    register_post_type('post', ['label' => 'Posts']);
+    register_post_type('page', ['label' => 'Pages']);
+    register_post_type('product', ['label' => 'Products']);
+}
+
+add_action('send_headers', 'send_security_headers');
+function send_security_headers() {
+    if (!headers_sent()) {
+        header("X-Content-Type-Options: nosniff");
+        header("X-Frame-Options: SAMEORIGIN");
+        header("X-XSS-Protection: 1; mode=block");
+        header("Referrer-Policy: strict-origin-when-cross-origin");
     }
-    
-    return $themes;
 }
-
-// Activate theme
-function activate_theme($conn, $theme_slug) {
-    // Deactivate all themes first
-    mysqli_query($conn, "UPDATE themes SET is_active = 0");
-    
-    // Activate selected theme
-    $sql = "UPDATE themes SET is_active = 1 WHERE slug = '" . sanitize_input($theme_slug) . "'";
-    return mysqli_query($conn, $sql);
-}
-
-// Get all plugins (admin only function)
-function get_all_plugins($conn) {
-    $sql = "SELECT * FROM plugins ORDER BY name";
-    $result = mysqli_query($conn, $sql);
-    
-    $plugins = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $plugins[] = $row;
-    }
-    
-    return $plugins;
-}
-
-// Toggle plugin status (admin only)
-function toggle_plugin($conn, $plugin_slug) {
-    $sql = "UPDATE plugins SET is_active = NOT is_active WHERE slug = '" . sanitize_input($plugin_slug) . "'";
-    return mysqli_query($conn, $sql);
-}
-
-// Get posts with pagination
-function get_posts($conn, $limit = 10, $offset = 0, $status = 'published', $post_type = null) {
-    $sql = "SELECT p.*, u.display_name as author_name, c.name as category_name 
-            FROM posts p 
-            LEFT JOIN users u ON p.author_id = u.id 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.status = '" . sanitize_input($status) . "'";
-    
-    if ($post_type) {
-        $sql .= " AND p.post_type = '" . sanitize_input($post_type) . "'";
-    }
-    
-    $sql .= " ORDER BY p.published_at DESC LIMIT $limit OFFSET $offset";
-    
-    $result = mysqli_query($conn, $sql);
-    
-    $posts = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $posts[] = $row;
-    }
-    
-    return $posts;
-}
-
-// Get single post by slug
-function get_post_by_slug($conn, $slug) {
-    $sql = "SELECT p.*, u.display_name as author_name, c.name as category_name 
-            FROM posts p 
-            LEFT JOIN users u ON p.author_id = u.id 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.slug = '" . sanitize_input($slug) . "'";
-    
-    $result = mysqli_query($conn, $sql);
-    
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result);
-    }
-    
-    return null;
-}
-
-// Get post count
-function get_post_count($conn, $status = 'published') {
-    $sql = "SELECT COUNT(*) as count FROM posts WHERE status = '" . sanitize_input($status) . "'";
-    $result = mysqli_query($conn, $sql);
-    
-    if ($result) {
-        $row = mysqli_fetch_assoc($result);
-        return $row['count'];
-    }
-    
-    return 0;
-}
-
-// Get categories
-function get_categories($conn, $parent_id = 0) {
-    $sql = "SELECT c.*, COUNT(p.id) as post_count 
-            FROM categories c 
-            LEFT JOIN posts p ON c.id = p.category_id AND p.status = 'published'
-            WHERE c.parent_id = $parent_id
-            GROUP BY c.id ORDER BY c.name";
-    
-    $result = mysqli_query($conn, $sql);
-    
-    $categories = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $categories[] = $row;
-    }
-    
-    return $categories;
-}
-
-// Get menu items
-function get_menu_items($conn, $menu_slug = 'main-menu') {
-    $sql = "SELECT mi.*, p.slug as post_slug 
-            FROM menu_items mi 
-            JOIN menus m ON mi.menu_id = m.id 
-            LEFT JOIN posts p ON mi.post_id = p.id 
-            WHERE m.slug = '" . sanitize_input($menu_slug) . "' 
-            ORDER BY mi.position";
-    
-    $result = mysqli_query($conn, $sql);
-    
-    $items = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $items[] = $row;
-    }
-    
-    return $items;
-}
-
-// Format date
-function format_date($date, $format = null) {
-    global $conn;
-    
-    if (!$format) {
-        $format = get_option($conn, 'date_format', 'F j, Y');
-    }
-    
-    return date($format, strtotime($date));
-}
-
-// Truncate text
-function truncate_text($text, $length = 100, $suffix = '...') {
-    if (strlen($text) <= $length) {
-        return $text;
-    }
-    
-    return substr($text, 0, $length) . $suffix;
-}
-
-// Get excerpt from content
-function get_excerpt($content, $length = 150) {
-    $excerpt = strip_tags($content);
-    return truncate_text($excerpt, $length);
-}
-
-// Upload file
-function upload_file($file, $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']) {
-    if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
-        return ['success' => false, 'message' => 'Upload error occurred'];
-    }
-    
-    // Check file size
-    if ($file['size'] > MAX_UPLOAD_SIZE) {
-        return ['success' => false, 'message' => 'File too large'];
-    }
-    
-    // Check file type
-    if (!in_array($file['type'], $allowed_types)) {
-        return ['success' => false, 'message' => 'Invalid file type'];
-    }
-    
-    // Generate unique filename
-    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $filename = uniqid() . '_' . time() . '.' . $extension;
-    $filepath = UPLOAD_DIR . $filename;
-    
-    // Create uploads directory if it doesn't exist
-    if (!file_exists(UPLOAD_DIR)) {
-        mkdir(UPLOAD_DIR, 0755, true);
-    }
-    
-    // Move uploaded file
-    if (move_uploaded_file($file['tmp_name'], $filepath)) {
-        return ['success' => true, 'filename' => $filename, 'filepath' => $filepath];
-    }
-    
-    return ['success' => false, 'message' => 'Failed to save file'];
-}
-
-// Save media to database
-function save_media($conn, $filename, $original_name, $mime_type, $file_size, $filepath, $uploaded_by, $alt_text = '') {
-    $sql = "INSERT INTO media (filename, original_name, mime_type, file_size, filepath, uploaded_by, alt_text) 
-            VALUES ('" . sanitize_input($filename) . "', 
-                    '" . sanitize_input($original_name) . "', 
-                    '" . sanitize_input($mime_type) . "', 
-                    $file_size, 
-                    '" . sanitize_input($filepath) . "', 
-                    $uploaded_by, 
-                    '" . sanitize_input($alt_text) . "')";
-    
-    if (mysqli_query($conn, $sql)) {
-        return mysqli_insert_id($conn);
-    }
-    
-    return false;
-}
-
-// Increment post views
-function increment_post_views($conn, $post_id) {
-    $sql = "UPDATE posts SET views = views + 1 WHERE id = $post_id";
-    return mysqli_query($conn, $sql);
-}
-
-// Search posts
-function search_posts($conn, $query, $limit = 10) {
-    $query = sanitize_input($query);
-    $sql = "SELECT p.*, u.display_name as author_name, c.name as category_name 
-            FROM posts p 
-            LEFT JOIN users u ON p.author_id = u.id 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.status = 'published' 
-            AND (p.title LIKE '%$query%' OR p.content LIKE '%$query%' OR p.excerpt LIKE '%$query%')
-            ORDER BY p.published_at DESC 
-            LIMIT $limit";
-    
-    $result = mysqli_query($conn, $sql);
-    
-    $posts = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $posts[] = $row;
-    }
-    
-    return $posts;
-}
-
-// Get recent posts
-function get_recent_posts($conn, $limit = 5) {
-    return get_posts($conn, $limit, 0, 'published');
-}
-
-// Get popular posts by views
-function get_popular_posts($conn, $limit = 5) {
-    $sql = "SELECT p.*, u.display_name as author_name, c.name as category_name 
-            FROM posts p 
-            LEFT JOIN users u ON p.author_id = u.id 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.status = 'published' 
-            ORDER BY p.views DESC 
-            LIMIT $limit";
-    
-    $result = mysqli_query($conn, $sql);
-    
-    $posts = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $posts[] = $row;
-    }
-    
-    return $posts;
-}
-
-// Check plugin permissions (admin only)
-function can_manage_plugins() {
-    return is_admin();
-}
-
-// Get plugin by slug
-function get_plugin_by_slug($conn, $slug) {
-    $sql = "SELECT * FROM plugins WHERE slug = '" . sanitize_input($slug) . "'";
-    $result = mysqli_query($conn, $sql);
-    
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result);
-    }
-    
-    return null;
-}
-
-?>

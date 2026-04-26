@@ -1,125 +1,129 @@
-# Website Idea Validator - User Voting System
+# World-Class CMS
 
-A complete web application for submitting and voting on website ideas, built with Bootstrap (frontend) and Procedural PHP with MySQLi (backend).
+A professional, feature-rich Content Management System built with procedural PHP and MySQLi.
 
 ## Features
 
-- **Submit Ideas**: Users can submit their website ideas with title, description, and contact information
-- **Vote System**: Community members can vote for their favorite ideas (one vote per IP address per idea)
-- **Real-time Updates**: AJAX-based voting with instant feedback
-- **Admin Dashboard**: Moderate submissions (approve/reject ideas)
-- **Responsive Design**: Fully responsive UI using Bootstrap 5
-- **Security**: SQL injection prevention, input validation, XSS protection
+### Core Architecture
+- ✅ Procedural PHP architecture (no frameworks)
+- ✅ MySQLi prepared statements for security
+- ✅ Hook system (Actions & Filters like WordPress)
+- ✅ Nonce-based CSRF protection
+- ✅ Custom Post Types API
+- ✅ Asset management (enqueue scripts/styles)
+- ✅ Audit logging system
+- ✅ Revision control for posts
+
+### Security Features
+- ✅ SQL injection prevention (prepared statements)
+- ✅ XSS protection (output escaping)
+- ✅ CSRF tokens (nonce system)
+- ✅ Password hashing (bcrypt)
+- ✅ Role-based access control
+- ✅ Session security headers
+- ✅ 2FA support structure
+
+### Admin Panel
+- ✅ Modern Bootstrap 5 UI
+- ✅ Dashboard with statistics
+- ✅ Post/Page editor with TinyMCE
+- ✅ Media library management
+- ✅ Plugin manager
+- ✅ Theme switcher
+- ✅ User management
+- ✅ Settings panel
+- ✅ Audit log viewer
+
+### Frontend
+- ✅ Theme system
+- ✅ Template hierarchy
+- ✅ Search functionality
+- ✅ Category/tag archives
+- ✅ Responsive design
+- ✅ SEO-friendly URLs
+
+### Database Structure
+- Users (with roles & 2FA)
+- Posts (with custom types)
+- Post Revisions
+- Terms (categories/tags)
+- Comments (threaded)
+- Media Library
+- Options
+- Plugins
+- Themes
+- Audit Logs
+- User Sessions
+- Scheduled Tasks
+- Translations
+- Menus
+
+## Installation
+
+1. Configure `config.php` with your database credentials
+2. Run `setup.php` in your browser
+3. Login with admin/admin123
+4. Start building!
 
 ## File Structure
 
 ```
-/workspace
-├── config.php          # Database configuration
-├── setup.php           # Database setup script (run once)
-├── index.php           # Homepage - displays all approved ideas
-├── submit.php          # Idea submission form
-├── view.php            # View individual idea details
-├── vote.php            # AJAX voting handler
-├── admin.php           # Admin dashboard for moderation
-└── README.md           # This file
+cms/
+├── config.php           # Configuration
+├── setup.php            # Installation script
+├── index.php            # Frontend controller
+├── admin.php            # Admin panel
+├── includes/
+│   └── functions.php    # Core functions
+├── themes/
+│   └── multipurpose/    # Default theme
+│       ├── header.php
+│       ├── footer.php
+│       ├── home.php
+│       ├── single.php
+│       ├── page.php
+│       ├── search.php
+│       ├── category.php
+│       └── 404.php
+└── uploads/             # Media files
 ```
 
-## Installation
+## Usage Examples
 
-### Prerequisites
-- PHP 7.4 or higher
-- MySQL 5.7 or higher
-- Web server (Apache, Nginx, etc.)
+### Adding a Hook
+```php
+// Add action
+add_action('init', 'my_custom_function');
 
-### Setup Instructions
+// Add filter
+add_filter('the_content', 'modify_content');
+function modify_content($content) {
+    return $content . '<p>Custom footer</p>';
+}
+```
 
-1. **Configure Database Connection**
-   - Edit `config.php` and update the database credentials:
-     ```php
-     $host = 'localhost';
-     $username = 'root';
-     $password = 'your_password';
-     $database = 'idea_validator';
-     ```
+### Creating Custom Post Type
+```php
+register_post_type('product', [
+    'label' => 'Products',
+    'public' => true
+]);
+```
 
-2. **Create Database and Tables**
-   - Run the setup script by accessing: `http://your-domain/setup.php`
-   - This will create the database and necessary tables automatically
+### Enqueue Assets
+```php
+enqueue_script('my-script', '/js/custom.js');
+enqueue_style('my-style', '/css/custom.css');
+```
 
-3. **Access the Application**
-   - Homepage: `http://your-domain/index.php`
-   - Submit Ideas: `http://your-domain/submit.php`
-   - Admin Dashboard: `http://your-domain/admin.php`
+### Security
+```php
+// Create nonce
+wp_nonce_field('my_action');
 
-## Database Schema
-
-### Ideas Table
-- `id`: Auto-increment primary key
-- `title`: Idea title (VARCHAR 255)
-- `description`: Detailed description (TEXT)
-- `submitter_name`: Name of person who submitted
-- `submitter_email`: Email of submitter
-- `votes`: Vote count (INT, default 0)
-- `created_at`: Timestamp of submission
-- `status`: ENUM ('pending', 'approved', 'rejected')
-
-### Votes Table
-- `id`: Auto-increment primary key
-- `idea_id`: Foreign key to ideas table
-- `voter_ip`: IP address of voter (prevents duplicate votes)
-- `voted_at`: Timestamp of vote
-- Unique constraint on (idea_id, voter_ip)
-
-## Usage
-
-### For Users
-1. Visit the homepage to see all approved ideas
-2. Click "Vote" to upvote ideas you like (one vote per IP)
-3. Click "Submit Idea" to share your own website concept
-4. View detailed information about any idea by clicking "View Details"
-
-### For Administrators
-1. Access the admin dashboard at `/admin.php`
-2. Review pending ideas in the "Pending" section
-3. Approve or reject submissions
-4. Monitor approved ideas and their vote counts
-
-## Security Features
-
-- **SQL Injection Prevention**: All user inputs are escaped using `mysqli_real_escape_string()`
-- **XSS Protection**: Output is sanitized using `htmlspecialchars()`
-- **Input Validation**: Form inputs are validated for length, format, and required fields
-- **IP-based Vote Limiting**: Prevents multiple votes from the same IP address
-- **Transaction Support**: Voting uses database transactions for data integrity
-
-## Technologies Used
-
-### Frontend
-- Bootstrap 5.3.0
-- Bootstrap Icons 1.10.0
-- Vanilla JavaScript (Fetch API)
-
-### Backend
-- PHP (Procedural style)
-- MySQLi (Procedural)
-- MySQL Database
-
-## Customization
-
-### Styling
-Modify the CSS in the `<style>` tags within each PHP file or create a separate CSS file.
-
-### Database Configuration
-Update `config.php` to match your database credentials.
-
-### Vote Limiting
-Currently uses IP address for vote limiting. Can be modified to use cookies or user authentication.
+// Verify nonce
+verify_nonce($_POST['_wpnonce'], 'my_action');
+```
 
 ## License
-
-This project is open source and available for educational and commercial use.
-
-## Support
-
-For issues or questions, please check the code comments or submit a bug report.
+MIT License

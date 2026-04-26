@@ -1,0 +1,1 @@
+    <section class="py-5 text-center"><div class="container"><h1 class="display-1 text-danger">404</h1><h2>Story Not Found</h2><a href="index.php" class="btn btn-primary">Back to Home</a></div></section>

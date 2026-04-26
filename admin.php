@@ -294,3 +294,213 @@ if ($result) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+    <!-- Posts Management -->
+    <?php if ($action === 'posts'): ?>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>All Posts</span>
+            <a href="admin.php?action=post_new" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Post</a>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead><tr><th>Title</th><th>Author</th><th>Category</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody>
+                <?php
+                $all_posts = get_posts($conn, 100, 0, 'any');
+                foreach($all_posts as $post):
+                ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($post['title']); ?></td>
+                    <td><?php echo htmlspecialchars($post['author_name'] ?? 'Admin'); ?></td>
+                    <td><?php echo htmlspecialchars($post['category_name'] ?? 'Uncategorized'); ?></td>
+                    <td><span class="badge bg-<?php echo $post['status'] === 'published' ? 'success' : 'secondary'; ?>"><?php echo $post['status']; ?></span></td>
+                    <td><?php echo format_date($post['published_at'] ?? $post['created_at']); ?></td>
+                    <td>
+                        <a href="admin.php?action=post_edit&id=<?php echo $post['id']; ?>" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                        <?php if(is_admin()): ?>
+                        <a href="admin.php?action=post_delete&id=<?php echo $post['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this post?')"><i class="fas fa-trash"></i></a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- New/Edit Post Form -->
+    <?php if ($action === 'post_new' || $action === 'post_edit'): ?>
+    <?php
+    $post = null;
+    if ($action === 'post_edit' && isset($_GET['id'])) {
+        $post_id = (int)$_GET['id'];
+        $result = mysqli_query($conn, "SELECT * FROM posts WHERE id=$post_id");
+        $post = mysqli_fetch_assoc($result);
+    }
+    ?>
+    <form method="POST" action="admin.php?action=post_save" enctype="multipart/form-data">
+        <?php if($post): ?><input type="hidden" name="post_id" value="<?php echo $post['id']; ?>"><?php endif; ?>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" name="title" class="form-control" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Slug (optional)</label>
+                            <input type="text" name="slug" class="form-control" value="<?php echo htmlspecialchars($post['slug'] ?? ''); ?>" placeholder="auto-generated">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Content</label>
+                            <textarea name="content" class="form-control" rows="15"><?php echo htmlspecialchars($post['content'] ?? ''); ?></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header">Publish</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="draft" <?php echo ($post['status'] ?? '') === 'draft' ? 'selected' : ''; ?>>Draft</option>
+                                <option value="published" <?php echo ($post['status'] ?? '') === 'published' ? 'selected' : ''; ?>>Published</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Post Type</label>
+                            <select name="post_type" class="form-select">
+                                <option value="post" <?php echo ($post['post_type'] ?? '') === 'post' ? 'selected' : ''; ?>>Post</option>
+                                <option value="page" <?php echo ($post['post_type'] ?? '') === 'page' ? 'selected' : ''; ?>>Page</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100"><?php echo $post ? 'Update' : 'Publish'; ?></button>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">Category</div>
+                    <div class="card-body">
+                        <select name="category_id" class="form-select">
+                            <?php foreach($categories as $cat): ?>
+                            <option value="<?php echo $cat['id']; ?>" <?php echo ($post['category_id'] ?? 1) == $cat['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">Featured Image</div>
+                    <div class="card-body">
+                        <?php if($post && $post['featured_image']): ?>
+                        <img src="uploads/<?php echo $post['featured_image']; ?>" class="img-fluid mb-2 rounded">
+                        <?php endif; ?>
+                        <input type="file" name="featured_image" class="form-control" accept="image/*">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Excerpt</div>
+                    <div class="card-body">
+                        <textarea name="excerpt" class="form-control" rows="3"><?php echo htmlspecialchars($post['excerpt'] ?? ''); ?></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <?php endif; ?>
+
+    <!-- Themes Management (Admin Only) -->
+    <?php if ($action === 'themes' && is_admin()): ?>
+    <div class="row">
+        <?php foreach($themes as $theme): ?>
+        <div class="col-md-4 mb-4">
+            <div class="card theme-card <?php echo $theme['is_active'] ? 'active' : ''; ?>">
+                <div style="height: 200px; background: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-image fa-4x text-muted"></i>
+                </div>
+                <div class="card-body">
+                    <h5><?php echo htmlspecialchars($theme['name']); ?></h5>
+                    <p class="text-muted small"><?php echo htmlspecialchars($theme['description']); ?></p>
+                    <p class="small"><strong>Version:</strong> <?php echo $theme['version']; ?> | <strong>Author:</strong> <?php echo $theme['author']; ?></p>
+                    <?php if($theme['is_active']): ?>
+                    <span class="badge bg-success">Active</span>
+                    <?php else: ?>
+                    <a href="admin.php?action=theme_activate&slug=<?php echo $theme['slug']; ?>" class="btn btn-primary btn-sm">Activate</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Plugins Management (Admin Only) -->
+    <?php if ($action === 'plugins' && is_admin()): ?>
+    <div class="alert alert-info"><i class="fas fa-info-circle"></i> All plugins are admin-managed only. Non-admin users cannot modify plugin settings.</div>
+    <?php foreach($plugins as $plugin): ?>
+    <div class="plugin-item">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h5><?php echo htmlspecialchars($plugin['name']); ?> <?php if($plugin['admin_only']): ?><span class="admin-badge">Admin Only</span><?php endif; ?></h5>
+                <p class="text-muted mb-1"><?php echo htmlspecialchars($plugin['description']); ?></p>
+                <small><strong>Version:</strong> <?php echo $plugin['version']; ?> | <strong>Author:</strong> <?php echo $plugin['author']; ?></small>
+            </div>
+            <div>
+                <a href="admin.php?action=plugin_toggle&slug=<?php echo $plugin['slug']; ?>" class="btn btn-<?php echo $plugin['is_active'] ? 'success' : 'secondary'; ?>">
+                    <?php echo $plugin['is_active'] ? 'Active' : 'Inactive'; ?>
+                </a>
+            </div>
+        </div>
+    </div>
+    <?php endforeach; ?>
+    <?php endif; ?>
+
+    <!-- Settings (Admin Only) -->
+    <?php if ($action === 'settings' && is_admin()): ?>
+    <form method="POST" action="admin.php?action=settings_save">
+        <div class="card">
+            <div class="card-header">General Settings</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Site Title</label>
+                    <input type="text" name="setting_site_title" class="form-control" value="<?php echo htmlspecialchars(get_option($conn, 'site_title')); ?>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Site Description</label>
+                    <textarea name="setting_site_description" class="form-control" rows="3"><?php echo htmlspecialchars(get_option($conn, 'site_description')); ?></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Posts Per Page</label>
+                    <input type="number" name="setting_posts_per_page" class="form-control" value="<?php echo get_option($conn, 'posts_per_page', 10); ?>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Allow Comments</label>
+                    <select name="setting_allow_comments" class="form-select">
+                        <option value="1" <?php echo get_option($conn, 'allow_comments', 1) ? 'selected' : ''; ?>>Yes</option>
+                        <option value="0" <?php echo !get_option($conn, 'allow_comments', 1) ? 'selected' : ''; ?>>No</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </div>
+        </div>
+    </form>
+    <?php endif; ?>
+
+    <!-- Pages, Media, Users, Comments placeholders -->
+    <?php if (in_array($action, ['pages', 'media', 'users', 'comments'])): ?>
+    <div class="alert alert-info">
+        <h5><i class="fas fa-info-circle"></i> <?php echo ucfirst($action); ?> Management</h5>
+        <p>This section is under development. Admin-only access is enforced for users management.</p>
+    </div>
+    <?php endif; ?>
+
+    <?php endif; ?>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+<?php mysqli_close($conn); ?>

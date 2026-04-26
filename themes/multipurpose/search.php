@@ -1,21 +1,24 @@
-    <section class="py-5">
-        <div class="container">
-            <h1 class="mb-4">Search Results for "<?php echo htmlspecialchars($search_query); ?>"</h1>
-            <?php if(!empty($posts)): ?>
-                <div class="row">
-                <?php foreach($posts as $post): ?>
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5><a href="index.php?post=<?php echo $post['slug']; ?>" class="text-decoration-none"><?php echo htmlspecialchars($post['title']); ?></a></h5>
-                            <p class="text-muted"><?php echo get_excerpt($post['content'], 150); ?></p>
-                        </div>
+<?php
+global $cms_db;
+$search = sanitize_input($_GET['s']);
+$posts = db_fetch_all(db_query("SELECT * FROM posts WHERE (title LIKE ? OR content LIKE ?) AND status='published' ORDER BY published_at DESC", ["%$search%", "%$search%"]));
+?>
+<div class="container py-5">
+    <h1 class="mb-4">Search Results for "<?php echo htmlspecialchars($search); ?>"</h1>
+    <?php if (empty($posts)): ?>
+        <p class="text-muted">No results found.</p>
+    <?php else: ?>
+        <div class="row g-4">
+        <?php foreach ($posts as $post): ?>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5><a href="?post=<?php echo $post['slug']; ?>"><?php echo htmlspecialchars($post['title']); ?></a></h5>
+                        <p class="text-muted"><?php echo htmlspecialchars(substr($post['excerpt'] ?: $post['content'], 0, 150)); ?>...</p>
                     </div>
                 </div>
-                <?php endforeach; ?>
-                </div>
-            <?php else: ?>
-                <p class="text-muted">No results found.</p>
-            <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
         </div>
-    </section>
+    <?php endif; ?>
+</div>

@@ -1,42 +1,48 @@
-```
-# WordPress specific ignores
-wp-content/cache/
-wp-content/uploads/
-wp-config.php
-wp-content/plugins/
-!themes/
-!includes/
-
-# Dependencies
-vendor/
-node_modules/
-
-# Build artifacts
-*.css.map
-*.js.map
+```gitignore
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
 dist/
 build/
+*.class
 
-# Logs
+# Dependencies
+.venv/
+venv/
+node_modules/
+vendor/
+composer.lock
+
+# Logs and temp files
 *.log
+*.tmp
+*.swp
+*.swo
 
 # Environment
 .env
 .env.local
 .env.*
 
-# Editor/IDE
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
-*.tmp
+*.sublime-project
+*.sublime-workspace
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Cache
-.cache/
-*.cache
+# Coverage
+.coverage
+coverage/
+htmlcov/
+
+# PHP specific
+*.php~
+*.bak
+.htaccess
 ```

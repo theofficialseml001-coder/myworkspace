@@ -3,99 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($post) ? $post['title'] . ' - ' : ''; ?><?php echo $site_title; ?></title>
-    <meta name="description" content="<?php echo isset($post) && $post['excerpt'] ? $post['excerpt'] : $site_description; ?>">
-    <!-- Bootstrap 5 CSS -->
+    <title><?php echo get_option('site_title'); ?> - <?php echo get_option('site_description'); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Theme CSS -->
-    <link href="<?php echo $theme_path; ?>/assets/css/style.css" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #4e73df;
-            --secondary-color: #858796;
-            --success-color: #1cc88a;
-            --info-color: #36b9cc;
-            --warning-color: #f6c23e;
-            --danger-color: #e74a3b;
-            --light-color: #f8f9fc;
-            --dark-color: #5a5c69;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-brand { font-weight: 700; color: var(--primary-color) !important; }
-        .hero-section { 
-            background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%); 
-            color: white; 
-            padding: 100px 0; 
-        }
-        .feature-box { 
-            padding: 30px; 
-            border-radius: 10px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-            transition: transform 0.3s;
-        }
-        .feature-box:hover { transform: translateY(-5px); }
-        .feature-icon { 
-            font-size: 2.5rem; 
-            color: var(--primary-color); 
-            margin-bottom: 20px; 
-        }
-        .testimonial-card { 
-            background: var(--light-color); 
-            padding: 30px; 
-            border-radius: 10px; 
-            margin: 20px 0; 
-        }
-        .cta-section { 
-            background: var(--primary-color); 
-            color: white; 
-            padding: 60px 0; 
-        }
-        .post-card { 
-            border: none; 
-            border-radius: 10px; 
-            overflow: hidden; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-            transition: transform 0.3s;
-        }
-        .post-card:hover { transform: translateY(-5px); }
-        .post-card img { height: 200px; object-fit: cover; }
-        .sidebar-widget { 
-            background: var(--light-color); 
-            padding: 20px; 
-            border-radius: 10px; 
-            margin-bottom: 20px; 
-        }
-        footer { 
-            background: var(--dark-color); 
-            color: white; 
-            padding: 40px 0 20px; 
-        }
-        footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
-        footer a:hover { color: white; }
+        :root { --primary: #2c3e50; --secondary: #3498db; --accent: #e74c3c; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; }
+        .navbar { background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%); padding: 1rem 0; }
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: white !important; }
+        .nav-link { color: rgba(255,255,255,0.9) !important; margin: 0 0.5rem; }
+        .nav-link:hover { color: white !important; }
+        .hero { background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%); color: white; padding: 5rem 0; text-align: center; }
+        .feature-box { padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); transition: transform 0.3s; height: 100%; }
+        .feature-box:hover { transform: translateY(-10px); }
+        .section { padding: 4rem 0; }
+        .section-title { text-align: center; margin-bottom: 3rem; }
+        .section-title h2 { font-weight: 700; color: var(--primary); }
+        .footer { background: var(--primary); color: white; padding: 3rem 0; }
+        .footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+        .btn-primary { background: var(--secondary); border: none; padding: 0.75rem 2rem; }
+        .card { border: none; box-shadow: 0 3px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="index.php"><?php echo $site_title; ?></a>
+            <a class="navbar-brand" href="index.php"><i class="fas fa-laugh-wink me-2"></i><?php echo get_option('site_title'); ?></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <?php foreach($menu_items as $item): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $item['url'] ?: 'index.php?post=' . $item['post_slug']; ?>"><?php echo $item['label']; ?></a>
-                    </li>
-                    <?php endforeach; ?>
+                    <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="?page=about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="?page=services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="?page=contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin.php">Admin</a></li>
                 </ul>
-                <form class="d-flex ms-3" action="index.php" method="GET">
-                    <input class="form-control me-2" type="search" name="search" placeholder="Search..." value="<?php echo isset($search_query) ? htmlspecialchars($search_query) : ''; ?>">
-                    <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
-                </form>
             </div>
         </div>
     </nav>

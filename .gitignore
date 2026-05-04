@@ -1,38 +1,30 @@
 ```
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
+# Dependencies
+node_modules/
+
+# Build outputs
 dist/
 build/
-target/
+*.min.js
+*.min.css
+*.bundle.js
 
-# Dependencies
-.venv/
-venv/
-node_modules/
-.julia/
-zig*/
-
-# Logs and temp files
+# Logs
 *.log
-*.tmp
-*.swp
-*.swo
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Editors
+# Editor/IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.tmp
 
-# System files
+# OS
 .DS_Store
 Thumbs.db
 
@@ -41,53 +33,373 @@ coverage/
 htmlcov/
 .coverage
 
-# Python specific
-*.pyc
+# Python
 __pycache__/
+*.pyc
 *.pyo
 *.pyd
 .Python
-*.so
-*.egg-info/
-.eggs/
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage*
+.nox/
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
 
-# JavaScript/Node specific
+# Node.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+node_modules/
+dist/
+build/
+.nyc_output
+coverage/
+.nyc_output/
+coverage/
 
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# Compiled JavaScript
+*.js.map
+*.jsx.map
+*.ts.map
+*.tsx.map
 
-# Pytest
-.pytest_cache/
+# Webpack
+webpack-stats.json
+*.webpack.js
 
-# Gradle
+# Jekyll
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# Bower
+bower_components/
+
+# Grunt
+.grunt/
+grunt-staging/
+
+# Gulp
+.gulp/
+gulp-build/
+
+# Ember
+.ember-cli
+tmp/
+temp/
+
+# Rails
+*.gem
+*.rake
+doc/
+.ruby-version
+.sass-cache
+/coverage/
+/public/system/
+spec/reports/
+_saved_session
+.rvmrc
+.bundle/
+vendor/bundle/
+vendor/cache/
+vendor/gems/
+vendor/ruby/
+/log/*
+/tmp/*
+!log/.keep
+!tmp/.keep
+*.dump
+*.sqlite3
+*.sqlite3-journal
+.rake
+public/system/**
+db/*.sqlite3
+db/*.sqlite3-journal
+db/schema.rb
+db/seeds.rb
+config/database.yml
+config/secrets.yml
+
+# Spring
+bin/
+target/
+!.factorypath
 .gradle/
+!gradle.properties
+!gradlew
+!gradlew.bat
 
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Go
+*.o
+*.so
+*.exe
+*.dll
+*.dylib
+*.test
+*.prof
+vendor/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# C/C++
+*.o
+*.a
+*.so
+*.obj
+*.exe
+*.dll
+*.dylib
+*.plist
+*.swp
+
+# Ruby
+*.gem
+*.rake
+doc/
+.ruby-version
+.sass-cache
+/coverage/
+/spec/reports/
+_saved_session
+.rvmrc
+.bundle/
+vendor/bundle/
+vendor/cache/
+vendor/gems/
+vendor/ruby/
+
+# PHP
+vendor/
+composer.phar
+composer.lock
+*.phar
+
+# C#
+*.sln
+*.csproj
+*.user
+*.userosscache
+*.suo
+*.cache
+*.ilk
+*.meta
+*.pidb
+*.svclog
+*.pdb
+*.mdb
+*.exe
+*.dll
+*.ncb
+*.obj
+*.o
+*.so
+*.dylib
+*.nupkg
+[TestResult.xml]
+[BUILD_NUMBER].xml
+packages/
+Site/
+App_Data/
+bin/
+obj/
+log/
+*.VC.db
+*.VC.VC.opendb
+
+# Visual Studio Code
+.vscode/*
+
+# Visual Studio
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+ipch/
+obj/
+*.ilk
+*.log
+*.tlog
+*.sbr
+*.res
+*.metagen
+*.bsc
+*.mvc
+*.cache
+*.codemd5
+*.CompiledManifest.xml
+*.map
+*.lastcodeanalysissucceeded
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+[Tt]est[Rr]esult*/
+**/*.[Pp]ublish.xml
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+[Bb]in/
+[Dd]ebug*/
+[Dd]ebugNonShipping*/
+[Rr]elease*/
+_x0020_*.*$
+*.cer
+*.pdb
+*.cache
+*.ilk
+*.meta
+*.pidb
+*.log
+*.scc
+*.DotSettings.user
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.aps
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.vcxproj.filters
+*.VC.VC.opendb
+*.VC.db
+*.......
 ```

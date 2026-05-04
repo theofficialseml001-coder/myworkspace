@@ -156,20 +156,40 @@ This is a frontend clone with the following limitations compared to the original
 4. **Audio Download**: Cannot download generated audio files
 5. **Advanced Features**: No voice cloning, SSML support, or pronunciation editor
 
-## Future Enhancements
+## Future Enhancements ✨
 
-Potential improvements for extended functionality:
+### Recently Added Features
 
-- [ ] File upload and parsing (PDF, DOCX, TXT)
+- [x] **Dark Mode Toggle** - Switch between light and dark themes with persistent preference
+- [x] **File Upload Modal** - Drag & drop interface for PDF, DOCX, TXT, RTF, EPUB files
+- [x] **Reading History** - Track your reading sessions with localStorage persistence
+- [x] **Bookmarks System** - Save and jump to specific positions in documents
+- [x] **Settings Panel** - Customize font size, line height, pitch, and playback preferences
+- [x] **Enhanced Controls Bar** - Floating action buttons for quick access to features
+- [x] **Word Count Display** - Real-time word and character counting
+- [x] **Time Estimation** - Estimated reading time and remaining time display
+- [x] **Share Functionality** - Native share API with clipboard fallback
+- [x] **Download Feature** - Export text files (audio export simulation)
+- [x] **Toast Notifications** - Beautiful notification system for user feedback
+- [x] **Accessibility Improvements** - Reduced motion support, high contrast mode, print styles
+
+### Planned Enhancements
+
+- [ ] File upload parsing (actual PDF/DOCX text extraction)
 - [ ] User authentication and cloud storage
-- [ ] Integration with premium TTS APIs
-- [ ] Audio file download capability
-- [ ] Playlist management
-- [ ] Bookmarking and notes
-- [ ] Dark mode toggle
-- [ ] Multiple language support
-- [ ] Pronunciation dictionary
-- [ ] SSML support for advanced control
+- [ ] Integration with premium TTS APIs (Google, Amazon, Azure)
+- [ ] Real audio file download (MP3/WAV export)
+- [ ] Playlist management for multiple documents
+- [ ] Text highlighting while reading
+- [ ] Multiple language support with auto-detection
+- [ ] Pronunciation dictionary and custom phonemes
+- [ ] SSML support for advanced speech control
+- [ ] Voice cloning integration
+- [ ] Background playback support
+- [ ] PWA (Progressive Web App) capabilities
+- [ ] Offline support with service workers
+- [ ] Keyboard shortcuts customization
+- [ ] Reading statistics and analytics
 
 ## License
 

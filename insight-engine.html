@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Insight Engine - Prof Adeleke</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Story/Status Bars */
+        .story-progress-container {
+            display: flex;
+            gap: 4px;
+            padding: 10px 12px;
+            width: 100%;
+        }
+        .story-bar {
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            flex: 1;
+            border-radius: 2px;
+        }
+        .story-bar-active {
+            background: white;
+            width: 70%; 
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        /* TikTok Marquee */
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 12s linear infinite;
+        }
+
+        .vertical-card {
+            height: 640px;
+            width: 360px;
+            position: relative;
+        }
+
+        /* Prevent html2canvas from misaligning text during capture */
+        .capture-text {
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0f1a] text-slate-100 min-h-screen antialiased">
+
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 p-4">
+        <div class="max-w-6xl mx-auto flex flex-col xl:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white shadow-lg">
+                    <i data-lucide="award" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl tracking-tighter">INSIGHT ENGINE <span class="text-indigo-500 italic">v2.1</span></h1>
+                </div>
+            </div>
+            
+            <div class="flex bg-slate-900 p-1 rounded-2xl border border-slate-800 overflow-x-auto">
+                <button onclick="setView('facebook')" id="btn-facebook" class="px-4 py-2 rounded-xl text-[10px] font-black transition-all">FB STORY</button>
+                <button onclick="setView('instagram')" id="btn-instagram" class="px-4 py-2 rounded-xl text-[10px] font-black transition-all">IG POST</button>
+                <button onclick="setView('threads')" id="btn-threads" class="px-4 py-2 rounded-xl text-[10px] font-black transition-all">THREADS</button>
+                <button onclick="setView('whatsapp')" id="btn-whatsapp" class="px-4 py-2 rounded-xl text-[10px] font-black transition-all">WA STATUS</button>
+                <button onclick="setView('tiktok')" id="btn-tiktok" class="px-4 py-2 rounded-xl text-[10px] font-black transition-all">TIKTOK</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-10">
+        
+        <aside class="lg:col-span-4 space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+                <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Matrix Controller</h2>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Life Dimension</label>
+                        <select id="catSelect" onchange="updateSubs()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-sm font-bold text-white outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Focus Area</label>
+                        <select id="subSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-sm font-bold text-white outline-none"></select>
+                    </div>
+                    <button onclick="generate()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-5 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i> Generate New Insight
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-emerald-950/20 border border-emerald-900/50 rounded-3xl p-6 text-center">
+                <p class="text-[10px] font-black text-emerald-400 mb-4 uppercase tracking-widest">Prof Adeleke Daniel Durojaiye (PhD)</p>
+                <button onclick="downloadPNG()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all">
+                    <i data-lucide="download" class="w-4 h-4"></i> Download Card (.PNG)
+                </button>
+            </div>
+        </aside>
+
+        <section class="lg:col-span-8 flex flex-col items-center">
+            <div class="w-full flex justify-center" id="viewContainer">
+                
+                <div id="view-facebook" class="hidden vertical-card flex flex-col bg-[#1877F2] rounded-[32px] overflow-hidden shadow-2xl" style="transform: translateZ(0);">
+                    <div class="absolute inset-0 z-0" style="background: linear-gradient(135deg, #1877F2 0%, #0056b3 100%);"></div>
+                    <div class="z-20 w-full relative">
+                        <div class="story-progress-container">
+                            <div class="story-bar"><div class="story-bar-active"></div></div>
+                            <div class="story-bar"></div>
+                        </div>
+                        <div class="flex items-center gap-3 px-4 py-2">
+                            <div class="w-10 h-10 rounded-full border-2 border-white/40 bg-slate-800 flex items-center justify-center font-black text-white text-[10px]">AD</div>
+                            <div class="flex-1">
+                                <p class="text-[11px] font-black text-white">Prof Adeleke Daniel Durojaiye (PhD)</p>
+                                <p class="text-[9px] text-white/70 font-bold">Facebook Story</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center justify-center px-10 text-center z-20 relative">
+                        <p class="text-2xl font-black text-white capture-text" id="fb-text">Generating...</p>
+                        <p class="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/80 border-t border-white/20 pt-4" id="fb-display-cat">CATEGORY</p>
+                    </div>
+                    <div class="p-6 z-20 relative flex gap-3"><div class="flex-1 bg-white/20 backdrop-blur-md rounded-full py-3 px-6 text-xs text-white">Reply...</div></div>
+                </div>
+
+                <div id="view-instagram" class="hidden rounded-lg shadow-2xl overflow-hidden w-[500px] h-[600px] flex flex-col bg-black" style="transform: translateZ(0);">
+                    <div class="p-4 flex items-center gap-3 bg-black">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-500 to-purple-600 p-[1px]">
+                            <div class="w-full h-full bg-black rounded-full flex items-center justify-center text-[10px] font-black text-white">AD</div>
+                        </div>
+                        <span class="text-xs font-black text-white">prof_adeleke_phd</span>
+                    </div>
+                    <div class="w-[500px] h-[500px] bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 p-12 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <p class="text-xl font-bold text-white leading-relaxed mb-6 z-10 capture-text" id="insta-text">Generating...</p>
+                        <p class="text-[9px] tracking-[0.4em] text-indigo-400 font-black uppercase border-t border-white/10 pt-4 z-10" id="insta-display-cat"></p>
+                    </div>
+                    <div class="p-4 bg-black text-white text-[11px] px-4"><div class="flex gap-4 mb-1"><i data-lucide="heart" class="w-5 h-5"></i><i data-lucide="message-circle" class="w-5 h-5"></i></div><b>1,248 likes</b></div>
+                </div>
+
+                <div id="view-whatsapp" class="hidden vertical-card flex flex-col bg-[#075e54] rounded-[32px] overflow-hidden shadow-2xl" style="transform: translateZ(0);">
+                    <div class="absolute inset-0 bg-gradient-to-br from-[#128c7e] to-[#075e54] z-0"></div>
+                    <div class="z-20 w-full relative pt-4">
+                        <div class="story-progress-container"><div class="story-bar"><div class="story-bar-active" style="width: 80%"></div></div></div>
+                        <div class="flex items-center gap-3 px-4 py-2 text-white">
+                            <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                            <div class="w-10 h-10 rounded-full bg-emerald-900 border border-white/20 flex items-center justify-center font-black text-[10px]">AD</div>
+                            <div class="flex-1"><p class="text-[11px] font-black">Prof Adeleke Daniel Durojaiye (PhD)</p></div>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center justify-center px-10 text-center z-20 relative">
+                        <p class="text-2xl font-bold text-white capture-text" id="wa-text">Generating...</p>
+                        <p class="mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300" id="wa-display-cat">TOPIC</p>
+                    </div>
+                    <div class="p-8 z-20 relative text-center"><p class="text-[10px] font-black uppercase text-white/80">REPLY</p></div>
+                </div>
+
+                <div id="view-tiktok" class="hidden vertical-card flex flex-col bg-black rounded-[40px] overflow-hidden border-[8px] border-neutral-900 relative shadow-2xl">
+                    <div class="absolute inset-0 z-10 flex items-center justify-center px-10 text-center">
+                        <div>
+                            <p class="text-2xl font-black text-white italic capture-text" id="tiktok-text">Generating...</p>
+                            <span class="inline-block mt-4 px-3 py-1 bg-white/10 rounded text-[10px] font-bold text-cyan-400 uppercase tracking-widest border border-cyan-400/30" id="tiktok-display-cat">Category</span>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent z-20 text-white">
+                        <h4 class="font-black text-sm">@prof_adeleke_phd</h4>
+                        <p class="text-xs text-slate-300 mt-2">Strategic thinking for global impact.</p>
+                        <div class="mt-4 overflow-hidden w-2/3 flex items-center gap-2">
+                            <i data-lucide="music" class="w-4 h-4"></i>
+                            <span class="text-[10px] animate-marquee font-bold">Prof Adeleke Daniel Durojaiye (PhD) - Original Audio</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-threads" class="hidden bg-black border border-neutral-800 rounded-[32px] p-8 shadow-2xl w-[500px]">
+                    <div class="flex gap-4">
+                        <div class="w-11 h-11 rounded-full bg-slate-700 flex items-center justify-center font-black text-sm text-white">AD</div>
+                        <div class="flex-1">
+                            <p class="font-black text-sm text-white">prof_adeleke_phd</p>
+                            <p class="text-neutral-100 text-[15px] mt-1 capture-text" id="threads-text">Generating...</p>
+                            <p class="text-indigo-400 text-[10px] font-black mt-4 uppercase tracking-widest" id="threads-display-cat"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const categories = {
+            "Spiritual": ["Faith", "Worship", "Prayer"],
+            "Educational": ["Research", "Knowledge", "Skill development"],
+            "Career": ["Leadership", "Productivity", "Work ethics"],
+            "Financial": ["Investments", "Wealth", "Savings"],
+            "Legacy": ["Mentorship", "Impact", "Vision"]
+        };
+
+        // Specific quotes for Spiritual > Faith (100 Original Quotes)
+        const faithQuotes = [
+            "Faith is not the absence of doubt, but the decision to walk forward while it echoes.",
+            "You do not find faith by waiting for certainty; you cultivate it by trusting the unseen path.",
+            "Faith is the quiet architecture of hope, built brick by brick in moments of uncertainty.",
+            "When logic reaches its limit, faith begins its quiet conversation with possibility.",
+            "Faith does not demand proof; it demands presence.",
+            "The strongest faith is forged not in comfort, but in the willingness to stand when everything shakes.",
+            "Faith is the compass that points true when the map runs out of ink.",
+            "You cannot measure faith with a ruler, but you can feel its weight in every step taken blindly yet boldly.",
+            "Faith is not a shield against storms, but an anchor beneath them.",
+            "Doubt is not faith's enemy; it is the soil where deeper trust takes root.",
+            "Faith speaks in whispers long before it shouts in miracles.",
+            "To have faith is to lend your hands to tomorrow before you see its face.",
+            "Faith is the courage to plant seeds in soil you have never seen bloom.",
+            "Certainty is a finished building; faith is the scaffolding that holds it together while it rises.",
+            "Faith does not ask for guarantees, only for the grace to keep showing up.",
+            "The quietest faith often moves the heaviest mountains.",
+            "Faith is not blind; it simply sees with a different kind of light.",
+            "When the world demands evidence, faith offers endurance.",
+            "Faith is the bridge between what is known and what is becoming.",
+            "You do not inherit faith; you negotiate it daily with your fears.",
+            "Faith is the language of the heart when the mind runs out of words.",
+            "True faith does not erase the unknown; it learns to dance with it.",
+            "Faith is the quiet rebellion against despair.",
+            "It is not the absence of fear that proves faith, but the presence of trust despite it.",
+            "Faith is the unseen thread that stitches broken moments into a coherent whole.",
+            "You cannot schedule faith, but you can make room for it in the margins of your day.",
+            "Faith does not promise a smooth road, only that the destination is worth the journey.",
+            "The deepest faith is often born in the silence after the prayer ends.",
+            "Faith is the decision to believe that your story is still being written.",
+            "When everything is measured, faith remains the unquantifiable variable that changes the equation.",
+            "Faith is not a destination; it is the rhythm of walking toward it.",
+            "You do not prove faith by avoiding risk, but by embracing it with open hands.",
+            "Faith is the quiet hum beneath the noise of a chaotic world.",
+            "The strongest faith does not shout; it stands.",
+            "Faith is the willingness to be wrong in the short term for the sake of truth in the long.",
+            "Doubt questions the path; faith commits to the walker.",
+            "Faith is not the absence of shadows, but the recognition that light still exists.",
+            "You cannot rush faith, but you can water it with patience.",
+            "Faith is the invisible architecture of resilience.",
+            "When logic says stop, faith says take one more step.",
+            "Faith does not require perfection; it requires participation.",
+            "The quietest faith often speaks the loudest in times of crisis.",
+            "Faith is the art of holding hope without demanding a receipt.",
+            "You do not find faith by searching for it; you discover it by living as if it's already there.",
+            "Faith is the gentle refusal to let circumstance dictate your direction.",
+            "When the future is fog, faith is the lantern you carry.",
+            "Faith is not a crutch for the weak, but a compass for the brave.",
+            "The weight of faith is never heavy when shared.",
+            "Faith is the quiet agreement between your soul and the unknown.",
+            "You cannot control the wind, but faith teaches you how to adjust the sails.",
+            "Faith is the bridge that appears only when you step onto it.",
+            "When certainty fractures, faith holds the pieces together.",
+            "Faith is not the absence of questions, but the courage to keep asking.",
+            "The deepest faith is often found in the space between surrender and action.",
+            "Faith is the quiet confidence that tomorrow is still worth preparing for.",
+            "You do not earn faith by being flawless; you cultivate it by being faithful to the process.",
+            "Faith is the invisible thread that weaves intention into outcome.",
+            "When the map is blank, faith becomes the cartographer.",
+            "Faith is not a guarantee of ease, but a promise of presence.",
+            "The strongest faith is often built on the foundation of past failures.",
+            "Faith is the quiet voice that says 'keep going' when the crowd says 'turn back.'",
+            "You cannot force faith to bloom, but you can till the soil and wait.",
+            "Faith is the courage to trust the process when the results are invisible.",
+            "When logic reaches its ceiling, faith opens the roof.",
+            "Faith is not a shield from pain, but a light within it.",
+            "The quietest faith often moves the heaviest hearts.",
+            "Faith is the decision to believe that your effort matters, even when it's unseen.",
+            "You do not measure faith by its volume, but by its consistency.",
+            "Faith is the gentle rebellion against cynicism.",
+            "When the path disappears, faith becomes the compass.",
+            "Faith is not the absence of struggle, but the presence of trust within it.",
+            "The deepest faith is often forged in the fire of unanswered questions.",
+            "Faith is the quiet promise you make to yourself when the world makes none.",
+            "You cannot schedule faith, but you can honor it with your attention.",
+            "Faith is the invisible bridge between despair and dawn.",
+            "When certainty fails, faith steps in as the silent guide.",
+            "Faith is not a demand for perfection, but an invitation to perseverance.",
+            "The strongest faith is often hidden in the smallest acts of daily trust.",
+            "Faith is the quiet acknowledgment that some things are bigger than us.",
+            "You do not prove faith by avoiding uncertainty, but by walking through it.",
+            "Faith is the gentle art of believing before you see.",
+            "When the road is dark, faith is the footstep that finds the next stone.",
+            "Faith is not a luxury for the calm, but a necessity for the storm.",
+            "The quietest faith often speaks loudest in moments of surrender.",
+            "Faith is the decision to trust the unseen architecture of life.",
+            "You cannot rush faith, but you can align your steps with its rhythm.",
+            "Faith is the quiet courage to plant seeds in untested soil.",
+            "When logic draws a line, faith extends it into the horizon.",
+            "Faith is not the absence of fear, but the presence of forward motion.",
+            "The deepest faith is often born in the quiet spaces between effort and outcome.",
+            "Faith is the gentle refusal to let disappointment dictate your direction.",
+            "You do not find faith by waiting for signs; you create it by becoming the sign.",
+            "Faith is the invisible thread that weaves patience into progress.",
+            "When the world demands proof, faith offers presence.",
+            "Faith is not a destination, but the daily practice of trusting the journey.",
+            "The strongest faith is often measured by how quietly it endures.",
+            "Faith is the quiet agreement that tomorrow is still worth your effort.",
+            "You cannot control the outcome, but faith teaches you to honor the process.",
+            "Faith is the gentle light that flickers longest when the wind blows hardest.",
+            "When all else fades, faith remains the quiet anchor of the human spirit."
+        ];
+
+        const worshipQuotes = [
+            "Worship is not confined to a place; it is the posture of a heart aligned with reverence.",
+            "True worship begins when the noise of the world fades and the soul leans into silence.",
+            "Worship is the language of gratitude spoken without words.",
+            "You do not worship to be seen; you worship to see clearly.",
+            "Worship is the quiet revolution of the spirit against the tyranny of self.",
+            "In worship, the ordinary becomes sacred because attention becomes devotion.",
+            "Worship is not performance; it is presence offered without expectation.",
+            "The deepest worship often happens in the unobserved moments of surrender.",
+            "Worship is the art of giving your attention to what deserves your awe.",
+            "When worship is genuine, it transforms the worshiper more than the worshipped.",
+            "Worship is the bridge between human limitation and divine possibility.",
+            "You cannot schedule worship, but you can cultivate a heart ready to receive it.",
+            "Worship is not about volume; it is about vulnerability.",
+            "The purest worship rises not from perfect words, but from honest hearts.",
+            "Worship is the quiet acknowledgment that some things are worthy of your everything.",
+            "In worship, time dissolves and eternity whispers.",
+            "Worship is the soul's way of saying, 'This matters more than me.'",
+            "You do not worship to change the divine; you worship to be changed by it.",
+            "Worship is the gentle rebellion against a world that worships the temporary.",
+            "When worship flows from authenticity, it becomes a sanctuary for the weary.",
+            "Worship is not a ritual to complete, but a relationship to inhabit.",
+            "The most powerful worship often leaves no record but a transformed life.",
+            "Worship is the act of aligning your inner rhythm with a greater harmony.",
+            "You cannot manufacture worship, but you can remove the distractions that block it.",
+            "Worship is the quiet courage to kneel when the world demands you stand alone.",
+            "In worship, the heart finds its truest voice beyond the limits of language.",
+            "Worship is not about getting it right; it is about giving it all.",
+            "The essence of worship is not in the song, but in the surrender behind it.",
+            "Worship is the soul's compass pointing toward what is ultimate.",
+            "When worship is rooted in truth, it becomes a wellspring of resilience.",
+            "Worship is the practice of seeing the sacred in the seemingly ordinary.",
+            "You do not worship to earn favor; you worship because favor has already been given.",
+            "Worship is the quiet defiance of despair through the declaration of worth.",
+            "In worship, the broken find wholeness not by fixing, but by offering.",
+            "Worship is the art of holding space for mystery without demanding resolution.",
+            "The deepest worship often begins where words end and wonder begins.",
+            "Worship is not a destination; it is the direction of a life oriented toward reverence.",
+            "You cannot contain worship in a building; it spills into every act done with love.",
+            "Worship is the gentle discipline of returning your focus to what endures.",
+            "When worship is sincere, it becomes a mirror reflecting your deepest values.",
+            "Worship is the soul's response to beauty, truth, and goodness encountered.",
+            "You do not worship to escape life, but to engage it with deeper meaning.",
+            "Worship is the quiet agreement that some realities deserve your awe.",
+            "In worship, the ego softens and the spirit expands.",
+            "Worship is not about perfection; it is about participation with an open heart.",
+            "The most transformative worship often happens in the privacy of a whispered thanks.",
+            "Worship is the practice of anchoring your identity in something beyond circumstance.",
+            "You cannot force worship, but you can cultivate a heart attentive to the sacred.",
+            "Worship is the gentle rebellion against a culture of consumption and distraction.",
+            "When worship flows from gratitude, it becomes a catalyst for generosity.",
+            "Worship is the art of listening more than speaking, receiving more than demanding.",
+            "You do not worship to be filled; you worship because you have already been filled.",
+            "Worship is the quiet acknowledgment that you are part of a story larger than yourself.",
+            "In worship, the heart finds rest not in answers, but in trust.",
+            "Worship is not a performance for others; it is a offering from within.",
+            "The purest worship often leaves no trace but a quieter mind and a kinder heart.",
+            "Worship is the practice of honoring the source of your breath, your hope, your home.",
+            "You cannot measure worship by its duration, but by its depth of surrender.",
+            "Worship is the gentle discipline of returning, again and again, to what matters most.",
+            "When worship is rooted in love, it becomes a force for healing in the world.",
+            "Worship is the soul's way of saying, 'I see you, and I am changed by seeing.'",
+            "You do not worship to gain power; you worship to release the need to control.",
+            "Worship is the quiet courage to be still in a world that glorifies busyness.",
+            "In worship, the fragmented self finds coherence in the presence of the whole.",
+            "Worship is not about having the right feelings; it is about offering the real ones.",
+            "The deepest worship often arises not in abundance, but in honest lack.",
+            "Worship is the practice of aligning your desires with what is truly desirable.",
+            "You cannot outsource worship; it is a personal encounter that transforms communal life.",
+            "Worship is the gentle rebellion against cynicism through the choice to reverence.",
+            "When worship is authentic, it becomes a wellspring of creativity and compassion.",
+            "Worship is the art of holding the sacred lightly enough to share, firmly enough to honor.",
+            "You do not worship to avoid pain; you worship to find meaning within it.",
+            "Worship is the quiet acknowledgment that gratitude is a form of resistance.",
+            "In worship, the heart learns to receive grace without earning it.",
+            "Worship is not a checklist item; it is the rhythm of a life attuned to wonder.",
+            "The most enduring worship often leaves no monument but a legacy of love.",
+            "Worship is the practice of seeing the divine in the face of the stranger.",
+            "You cannot compartmentalize worship; it colors every decision, every relationship.",
+            "Worship is the gentle discipline of choosing awe over anxiety, trust over turmoil.",
+            "When worship flows from humility, it becomes a bridge to genuine connection.",
+            "Worship is the soul's response to the mystery that holds all things together.",
+            "You do not worship to be special; you worship to remember you are part of something sacred.",
+            "Worship is the quiet courage to praise when praise feels difficult.",
+            "In worship, the heart finds its true north beyond the pull of distraction.",
+            "Worship is not about emotional highs; it is about faithful presence.",
+            "The deepest worship often happens in the ordinary acts done with extraordinary love.",
+            "Worship is the practice of returning your attention to the source of your strength.",
+            "You cannot rush worship, but you can prepare your heart to receive it.",
+            "Worship is the gentle rebellion against the idolatry of self-sufficiency.",
+            "When worship is rooted in truth, it becomes a foundation for justice and mercy.",
+            "Worship is the art of letting go of the need to understand in order to trust.",
+            "You do not worship to change your circumstances; you worship to change your perspective.",
+            "Worship is the quiet acknowledgment that reverence is a form of wisdom.",
+            "In worship, the soul finds rest not in resolution, but in relationship.",
+            "Worship is not a private escape; it is a public declaration of what you value most.",
+            "The most powerful worship often leaves no record but a life lived with integrity.",
+            "Worship is the practice of honoring the sacred in the mundane, the eternal in the moment.",
+            "You cannot contain the impact of genuine worship; it ripples outward in unseen ways.",
+            "Worship is the gentle discipline of returning, again and again, to the heart of what is holy.",
+            "When worship becomes a way of life, every breath becomes a prayer, every act an offering."
+        ];
+
+        const prayerQuotes = [
+            "Prayer is not about changing the divine; it is about allowing the divine to change you.",
+            "Meditation is the art of listening to the silence between your thoughts.",
+            "In prayer, words are optional; presence is essential.",
+            "Meditation does not empty the mind; it clarifies the heart.",
+            "Prayer is the quiet conversation that continues even after you stop speaking.",
+            "The deepest meditation begins when you stop trying to achieve and start allowing.",
+            "Prayer is not a request list; it is a relationship ritual.",
+            "Meditation is the practice of returning, again and again, to the breath of now.",
+            "You do not pray to be heard by others; you pray to hear yourself more clearly.",
+            "Meditation is not escape from life; it is engagement with life at a deeper frequency.",
+            "Prayer is the soul's way of aligning its rhythm with a greater harmony.",
+            "In meditation, the noise of the world softens, and the voice within grows audible.",
+            "Prayer is not about perfect words; it is about honest posture.",
+            "Meditation is the gentle discipline of noticing without judging.",
+            "You cannot rush prayer, but you can make space for it to unfold.",
+            "Meditation is not about stopping thoughts; it is about changing your relationship to them.",
+            "Prayer is the quiet courage to bring your whole self—broken and beautiful—into the light.",
+            "In meditation, time slows, and presence expands.",
+            "Prayer is not a transaction; it is a transformation.",
+            "Meditation is the practice of being with what is, without immediately trying to fix it.",
+            "You do not meditate to become someone else; you meditate to meet who you already are.",
+            "Prayer is the art of holding hope when hope feels fragile.",
+            "Meditation is the quiet rebellion against the tyranny of constant doing.",
+            "In prayer, the heart finds words for what the mind cannot articulate.",
+            "Meditation is not about achieving blankness; it is about cultivating awareness.",
+            "Prayer is the gentle act of surrendering control without surrendering care.",
+            "You cannot measure the impact of prayer, but you can feel its resonance in your choices.",
+            "Meditation is the practice of letting thoughts pass like clouds without chasing them.",
+            "Prayer is not about getting answers; it is about deepening the questions that matter.",
+            "In meditation, the boundary between self and stillness begins to dissolve.",
+            "Prayer is the quiet acknowledgment that you are not alone in your struggle.",
+            "Meditation is the art of returning to center when life pulls you in ten directions.",
+            "You do not pray to avoid pain; you pray to find meaning within it.",
+            "Meditation is not a luxury for the calm; it is a necessity for the chaotic.",
+            "Prayer is the soul's compass recalibrating in the presence of the sacred.",
+            "In meditation, the mind learns to rest without demanding resolution.",
+            "Prayer is not about changing circumstances; it is about changing your stance toward them.",
+            "Meditation is the gentle discipline of observing your inner weather without becoming the storm.",
+            "You cannot force prayer to be profound, but you can show up consistently for it.",
+            "Meditation is the practice of being fully here, fully now, without apology.",
+            "Prayer is the quiet courage to speak your truth when silence feels safer.",
+            "In meditation, the heart finds space to breathe beyond the constraints of worry.",
+            "Prayer is not a performance; it is a permission to be vulnerable.",
+            "Meditation is the art of listening to the wisdom that lives beneath the noise.",
+            "You do not meditate to escape responsibility; you meditate to engage it with clarity.",
+            "Prayer is the gentle act of placing your burdens beside a presence greater than your own.",
+            "Meditation is not about emptying; it is about making room.",
+            "In prayer, the fragmented self finds coherence in the act of offering.",
+            "Meditation is the practice of noticing the gap between stimulus and response—and choosing wisely.",
+            "Prayer is the quiet rebellion against despair through the choice to hope aloud.",
+            "You cannot schedule enlightenment, but you can cultivate the conditions for insight through meditation.",
+            "Meditation is the art of being with uncertainty without rushing to resolve it.",
+            "Prayer is not about having faith; it is about practicing faith in real time.",
+            "In meditation, the mind learns to rest in the question rather than demanding the answer.",
+            "Prayer is the gentle discipline of returning your focus to what endures beyond the moment.",
+            "Meditation is not about achieving peace; it is about recognizing the peace that is already there.",
+            "You do not pray to be rescued; you pray to be strengthened for the journey.",
+            "Meditation is the practice of observing your thoughts without letting them steer your ship.",
+            "Prayer is the quiet acknowledgment that gratitude is a form of prayer in motion.",
+            "In meditation, the heart finds rest not in certainty, but in trust.",
+            "Prayer is not about perfect silence; it is about honest expression.",
+            "Meditation is the gentle rebellion against the illusion that busyness equals worth.",
+            "You cannot outsource your inner work; prayer and meditation are personal encounters with universal impact.",
+            "Meditation is the art of letting go of the need to control the outcome of your thoughts.",
+            "Prayer is the quiet courage to ask for help when pride says you should handle it alone.",
+            "In meditation, the mind learns to witness without attaching to every passing narrative.",
+            "Prayer is not about changing God's mind; it is about aligning your will with wisdom.",
+            "Meditation is the practice of returning to the breath as an anchor in the storm of distraction.",
+            "You do not meditate to become enlightened; you meditate to notice the light already within.",
+            "Prayer is the gentle act of placing your fears beside a presence that holds them gently.",
+            "Meditation is not about stopping the river of thought; it is about learning to float without drowning.",
+            "In prayer, the heart finds words for the wounds that have no other language.",
+            "Meditation is the quiet discipline of noticing the space between who you are and who you pretend to be.",
+            "Prayer is not a ritual to complete; it is a relationship to inhabit.",
+            "You cannot measure the depth of meditation by its duration, but by the clarity it brings to your next action.",
+            "Meditation is the art of being present without demanding that the present be different.",
+            "Prayer is the quiet rebellion against cynicism through the choice to believe in possibility.",
+            "In meditation, the soul finds rest not in answers, but in the willingness to dwell in the question.",
+            "Prayer is not about having the right feelings; it is about offering the real ones.",
+            "Meditation is the gentle practice of letting your awareness expand beyond the confines of self-concern.",
+            "You do not pray to avoid growth; you pray to be softened for the transformation ahead.",
+            "Meditation is the art of observing your inner landscape without immediately trying to redesign it.",
+            "Prayer is the quiet acknowledgment that surrender is not defeat, but a different kind of strength.",
+            "In meditation, the mind learns to rest in the stillness that exists beneath the surface of thought.",
+            "Prayer is not about getting what you want; it is about wanting what is true.",
+            "Meditation is the gentle discipline of returning to now, again and again, without self-judgment.",
+            "You cannot force insight, but you can create the conditions for it through consistent meditation.",
+            "Meditation is the practice of listening to the wisdom that speaks in whispers, not shouts.",
+            "Prayer is the quiet courage to bring your doubts into the light of trust.",
+            "In meditation, the heart finds space to heal not by fixing, but by feeling.",
+            "Prayer is not a private escape; it is a public declaration of what you value most deeply.",
+            "Meditation is the art of being with discomfort without immediately reaching for distraction.",
+            "You do not meditate to become perfect; you meditate to become present.",
+            "Prayer is the gentle act of aligning your desires with what is truly desirable.",
+            "Meditation is the quiet rebellion against the myth that productivity is the only measure of worth.",
+            "In prayer, the fragmented self finds coherence in the act of honest offering.",
+            "Meditation is the practice of noticing the gap between reaction and response—and choosing wisdom.",
+            "Prayer is not about having all the answers; it is about trusting the One who holds the questions.",
+            "Meditation is the gentle discipline of returning to the breath, the body, the now—again and again.",
+            "When prayer and meditation become a way of life, every moment becomes a sanctuary, every breath a blessing."
+        ];
+
+        const starts = ["The foundation of", "Advancing in", "Mastering", "Transforming"];
+        const middles = ["requires alignment with", "is anchored in", "manifests through"];
+        const ends = ["sustained excellence.", "global impact.", "unwavering integrity."];
+
+        let currentActiveView = 'facebook';
+
+        function populate() {
+            const catSelect = document.getElementById('catSelect');
+            for (let cat in categories) {
+                const opt = document.createElement('option');
+                opt.value = cat; opt.innerText = cat;
+                catSelect.appendChild(opt);
+            }
+            updateSubs();
+        }
+
+        function updateSubs() {
+            const cat = document.getElementById('catSelect').value;
+            const subSelect = document.getElementById('subSelect');
+            subSelect.innerHTML = '';
+            categories[cat].forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s; opt.innerText = s;
+                subSelect.appendChild(opt);
+            });
+        }
+
+        function generate() {
+            const cat = document.getElementById('catSelect').value;
+            const sub = document.getElementById('subSelect').value;
+            let quote = "";
+
+            // Check if we are in Spiritual category to use the specific lists
+            if (cat === "Spiritual") {
+                let selectedArray = [];
+                if (sub === "Faith") {
+                    selectedArray = faithQuotes;
+                } else if (sub === "Worship") {
+                    selectedArray = worshipQuotes;
+                } else if (sub === "Prayer") {
+                    selectedArray = prayerQuotes;
+                }
+                
+                if (selectedArray.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * selectedArray.length);
+                    quote = `"${selectedArray[randomIndex]}"`;
+                } else {
+                    // Fallback if array not found
+                    quote = `"${sub} insight coming soon."`;
+                }
+            } else {
+                // Fallback to generic generator for other categories
+                const start = starts[Math.floor(Math.random()*starts.length)];
+                const middle = middles[Math.floor(Math.random()*middles.length)];
+                const end = ends[Math.floor(Math.random()*ends.length)];
+                quote = `"${start} ${sub.toLowerCase()} ${middle} ${end}"`;
+            }
+
+            ['fb', 'wa', 'insta', 'threads', 'tiktok'].forEach(v => {
+                document.getElementById(`${v}-text`).innerText = quote;
+                const catEl = document.getElementById(`${v}-display-cat`);
+                if(catEl) catEl.innerText = sub;
+            });
+        }
+
+        function setView(view) {
+            currentActiveView = view;
+            ['facebook', 'instagram', 'threads', 'whatsapp', 'tiktok'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                document.getElementById(`btn-${v}`).className = "px-4 py-2 rounded-xl text-[10px] font-black text-slate-500 transition-all";
+            });
+            document.getElementById(`view-${view}`).classList.remove('hidden');
+            document.getElementById(`btn-${view}`).className = "px-4 py-2 rounded-xl text-[10px] font-black bg-indigo-600 text-white shadow-lg";
+        }
+
+        async function downloadPNG() {
+            const element = document.getElementById(`view-${currentActiveView}`);
+            window.scrollTo(0,0);
+            try {
+                const canvas = await html2canvas(element, { 
+                    scale: 3, 
+                    useCORS: true, 
+                    backgroundColor: "#000000",
+                    width: currentActiveView === 'instagram' ? 500 : (currentActiveView === 'threads' ? 500 : 360),
+                    height: currentActiveView === 'instagram' ? 600 : (currentActiveView === 'threads' ? element.offsetHeight : 640),
+                    onclone: (clonedDoc) => {
+                        clonedDoc.getElementById(`view-${currentActiveView}`).style.display = 'flex';
+                    }
+                });
+                const link = document.createElement('a');
+                link.download = `Prof_Adeleke_${currentActiveView}.png`;
+                link.href = canvas.toDataURL("image/png", 1.0);
+                link.click();
+            } catch (err) {
+                alert("Download failed. Please ensure you are on a desktop browser.");
+            }
+        }
+
+        window.onload = () => { populate(); generate(); setView('facebook'); lucide.createIcons(); };
+    </script>
+</body>
+</html>

@@ -1,53 +1,19 @@
-```
-# Environment and config files
-.env
-.env.local
-.env.*
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-
-# Editor/IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
+```gitignore
 # Dependencies
-node_modules/
 vendor/
 
-# Build artifacts
-dist/
-build/
-target/
-*.o
-*.obj
-*.out
+# Logs and temp files
+*.log
+*.tmp
 
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
+# Environment
+.env
+.env.local
+*.env.*
 
-# PHP specific
-*.php~
-*.php.bak
-
-# Database
-*.sql
-database.sql
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
+# Editors
+.vscode/
+.idea/
 
 # OS generated files
 .DS_Store

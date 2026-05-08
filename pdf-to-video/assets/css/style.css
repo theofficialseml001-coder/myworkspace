@@ -1,0 +1,354 @@
+/* 
+ * Custom CSS for PDF to Video Converter
+ * Advanced Bootstrap Styling
+ */
+
+/* Gradient Backgrounds */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+}
+
+/* Hover Effects */
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* Step Circle */
+.step-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+/* Feature Box */
+.feature-box {
+    padding: 20px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.feature-box:hover {
+    background-color: #f8f9fa;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Card Enhancements */
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* Button Enhancements */
+.btn {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+}
+
+/* Navbar Enhancement */
+.navbar {
+    backdrop-filter: blur(10px);
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-control-lg {
+    font-size: 1.1rem;
+    padding: 15px 20px;
+}
+
+/* Alert Enhancements */
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Progress Bar */
+.progress {
+    border-radius: 10px;
+    height: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+/* Video Player */
+video {
+    border-radius: 10px;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
+
+/* Loading Spinner */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* List Group Enhancement */
+.list-group-item {
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.list-group-item:hover {
+    border-left-color: #667eea;
+    background-color: #f8f9fa;
+}
+
+/* Sticky Top Enhancement */
+.sticky-top {
+    z-index: 100;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+}
+
+/* Upload Zone */
+.upload-zone {
+    border: 3px dashed #dee2e6;
+    border-radius: 15px;
+    padding: 50px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-zone:hover {
+    border-color: #667eea;
+    background-color: #f8f9fa;
+}
+
+.upload-zone.dragover {
+    border-color: #764ba2;
+    background-color: #e9ecef;
+}
+
+/* Stats Card */
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 30px;
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -36px;
+    top: 5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #667eea;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #e9ecef;
+}
+
+/* Image Preview */
+.image-preview {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Tooltips */
+.tooltip-inner {
+    background-color: #667eea;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: #667eea;
+}
+
+/* Modal Enhancement */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    border-bottom: 2px solid #e9ecef;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-footer {
+    border-top: 2px solid #e9ecef;
+}
+
+/* Table Enhancement */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* Pagination */
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+    border: none;
+    color: #667eea;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.pagination .page-link:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+}
